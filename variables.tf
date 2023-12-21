@@ -17,6 +17,16 @@ variable "nicparent" {
   type = string
 }
 
+variable "nicname" {
+  type    = string
+  default = "eth0"
+}
+
+variable "nictype" {
+  type    = string
+  default = "bridged"
+}
+
 variable "autostart" {
   type = bool
 }

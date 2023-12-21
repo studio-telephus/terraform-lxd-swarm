@@ -13,18 +13,24 @@ resource "random_id" "rng" {
 }
 
 module "swarm_container" {
-  source       = "./modules/container"
-  count        = length(var.containers)
-  image        = var.image
-  name         = var.containers[count.index].name
-  ipv4_address = var.containers[count.index].ipv4_address
-  profiles     = var.containers[count.index].profiles
+  count     = length(var.containers)
+  source    = "github.com/studio-telephus/terraform-lxd-instance.git?ref=1.0.1"
+  name      = var.containers[count.index].name
+  profiles  = var.containers[count.index].profiles
+  image     = var.image
+  autostart = var.autostart
+  nic = {
+    name = var.nicname
+    properties = {
+      nictype        = var.nictype
+      parent         = var.nicparent
+      "ipv4.address" = var.containers[count.index].ipv4_address
+    }
+  }
   mount_dirs   = var.containers[count.index].mount_dirs
+  exec_enabled = var.exec_enabled
+  exec         = var.containers[count.index].exec
   environment = merge(null_resource.container_environment.triggers, {
     RANDOM_STRING = random_id.rng.hex
   }, var.containers[count.index].environment)
-  exec         = var.containers[count.index].exec
-  nicparent    = var.nicparent
-  autostart    = var.autostart
-  exec_enabled = var.exec_enabled
 }

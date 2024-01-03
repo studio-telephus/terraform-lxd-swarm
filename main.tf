@@ -5,16 +5,9 @@ resource "null_resource" "container_environment" {
   }
 }
 
-resource "random_id" "rng" {
-  keepers = {
-    first = "${timestamp()}"
-  }
-  byte_length = 8
-}
-
 module "swarm_container" {
   count     = length(var.containers)
-  source    = "github.com/studio-telephus/terraform-lxd-instance.git?ref=1.0.1"
+  source    = "github.com/studio-telephus/terraform-lxd-instance.git?ref=1.0.3"
   name      = var.containers[count.index].name
   profiles  = var.containers[count.index].profiles
   image     = var.image
@@ -30,7 +23,8 @@ module "swarm_container" {
   mount_dirs   = var.containers[count.index].mount_dirs
   exec_enabled = var.exec_enabled
   exec         = var.containers[count.index].exec
-  environment = merge(null_resource.container_environment.triggers, {
-    RANDOM_STRING = random_id.rng.hex
-  }, var.containers[count.index].environment)
+  environment = merge(
+    null_resource.container_environment.triggers,
+    var.containers[count.index].environment
+  )
 }
